@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """fat tree for distributed sys"""
 
 import geni.portal as portal
