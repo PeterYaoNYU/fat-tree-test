@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Fat tree for distributed systems – revised for elect testing
+"""Fat tree for distributed systems - revised for elect testing
 
    This version respects the original interface assignments:
      - Nodes 0 and 1 attach to switch1 via link-0.
@@ -7,9 +7,9 @@
      - Node2 attaches via a single interface.
      - switch2 has exactly 2 interfaces.
      
-   To force data-center–style routing (e.g. traffic from switch3’s spine toward
+   To force data-center-style routing (e.g. traffic from switch3's spine toward
    node2 goes via switch2), we assign an IP only on link-2 for node2 and switch2.
-   (Switch3’s interface on link-2 remains unconfigured, so that its traffic for
+   (Switch3's interface on link-2 remains unconfigured, so that its traffic for
    the 10.0.2.0/24 network is routed via a static route through switch2.)
 """
 
@@ -73,7 +73,7 @@ link_1.addInterface(iface3)
 link_1.addInterface(iface4)
 
 # link-2: Intended to carry traffic between node-2 and switch2.
-# Although switch3’s iface10 is physically on this link (to “reflect” the spine),
+# Although switch3's iface10 is physically on this link (to "reflect" the spine),
 # we deliberately do NOT assign it an IP address so that switch3 must route to node-2.
 link_2 = request.Link('link-2')
 link_2.Site('undefined')
@@ -140,7 +140,7 @@ sudo ip route add default via 10.0.1.1
 """))
 
 #
-# The following static routes “force” inter-switch traffic so that:
+# The following static routes "force" inter-switch traffic so that:
 #  - Traffic toward node-2 (10.0.2.0/24) from switch3 is sent via switch2.
 #  - Other inter-leaf routes are similarly enforced.
 #
