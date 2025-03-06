@@ -8,9 +8,10 @@
      - switch2 has exactly 2 interfaces.
      
    To force data-center-style routing (e.g. traffic from switch3's spine toward
-   node2 goes via switch2), we assign an IP only on link-2 for node2 and switch2.
-   (Switch3's interface on link-2 remains unconfigured, so that its traffic for
-   the 10.0.2.0/24 network is routed via a static route through switch2.)
+   node2 goes via switch2), we assign IP addresses on link-2 using a /29.
+   On link-2, node2 and switch2 get the primary IPs while switch3 also gets an IP.
+   Then, on switch3 we delete the automatically installed connected route for link-2
+   and add a static route for 10.0.2.0/29 via switch2.
 """
 
 import geni.portal as portal
@@ -74,12 +75,13 @@ link_1.addInterface(iface4)
 
 # link-2: Intended to carry traffic between node-2 and switch2.
 # Although switch3's iface10 is physically on this link (to "reflect" the spine),
-# we deliberately do NOT assign it an IP address so that switch3 must route to node-2.
+# CloudLab requires an IP on every member. Therefore, we assign all members an IP
+# in a /29. Later, we force switch3 to use switch2 to reach node-2.
 link_2 = request.Link('link-2')
 link_2.Site('undefined')
 link_2.addInterface(iface2)
 link_2.addInterface(iface7)
-link_2.addInterface(iface10)  # No IP will be configured on iface10
+link_2.addInterface(iface10)  # Now we assign an IP below
 
 # link-3: Connects switch2 and switch1.
 link_3 = request.Link('link-3')
@@ -99,11 +101,14 @@ iface9.addAddress(pg.IPv4Address("10.0.1.1", "255.255.255.0"))
 iface3.addAddress(pg.IPv4Address("10.0.1.2", "255.255.255.0"))
 iface4.addAddress(pg.IPv4Address("10.0.1.3", "255.255.255.0"))
 
-# For link-2, use 10.0.2.0/24.
-# Only node-2 and switch2 get an IP here.
-iface7.addAddress(pg.IPv4Address("10.0.2.1", "255.255.255.0"))
-iface2.addAddress(pg.IPv4Address("10.0.2.2", "255.255.255.0"))
-# Note: Do not assign an IP to iface10 (switch3 on link-2)
+# For link-2, use 10.0.2.0/29.
+# We assign:
+#   - switch2 (iface7): 10.0.2.1/29
+#   - node-2 (iface2): 10.0.2.2/29
+#   - switch3 (iface10): 10.0.2.3/29
+iface7.addAddress(pg.IPv4Address("10.0.2.1", "255.255.255.248"))
+iface2.addAddress(pg.IPv4Address("10.0.2.2", "255.255.255.248"))
+iface10.addAddress(pg.IPv4Address("10.0.2.3", "255.255.255.248"))
 
 # For link-3 (10.0.3.0/24)
 iface8.addAddress(pg.IPv4Address("10.0.3.1", "255.255.255.0"))
@@ -141,28 +146,32 @@ sudo ip route add default via 10.0.1.1
 
 #
 # The following static routes "force" inter-switch traffic so that:
-#  - Traffic toward node-2 (10.0.2.0/24) from switch3 is sent via switch2.
+#  - Traffic toward node-2 (10.0.2.0/29) from switch3 is sent via switch2.
 #  - Other inter-leaf routes are similarly enforced.
 #
 # On switch1 (leaf)
 node_switch1.addService(pg.Execute(shell="bash", command="""
-# To reach node-2 (10.0.2.0/24) via switch2 reachable on link-3:
-sudo ip route add 10.0.2.0/24 via 10.0.3.1
+# To reach node-2's network (10.0.2.0/29) via switch2 reachable on link-3:
+sudo ip route add 10.0.2.0/29 via 10.0.3.1
+sudo ip route add 10.0.1.0/24 via 10.0.3.1
 """))
 
 # On switch2 (middle leaf)
 node_switch2.addService(pg.Execute(shell="bash", command="""
 # Route to nodes on switch1 (10.0.0.0/24) via switch1 on link-3:
 sudo ip route add 10.0.0.0/24 via 10.0.3.2
+sudo ip route add 10.0.1.0/24 via 10.0.2.3
 """))
 
 # On switch3 (spine)
 node_switch3.addService(pg.Execute(shell="bash", command="""
-# Although physically on link-2, no IP is assigned to iface10.
-# Hence, to reach node-2's network, forward via switch2 (10.0.2.1):
-sudo ip route add 10.0.2.0/24 via 10.0.2.1
+# Delete the automatically installed connected route for link-2.
+# (Assuming the OS interface name for iface10 is 'interface-8'; adjust if needed.)
+# sudo ip route del 10.0.2.0/29 dev interface-8
+# Now, add a static route for node-2's network via switch2 (10.0.2.1):
+sudo ip route add 10.0.2.0/29 via 10.0.2.1
 # Also, route traffic destined for switch1's network via switch1 (reachable via link-3 through switch2):
-sudo ip route add 10.0.0.0/24 via 10.0.3.2
+sudo ip route add 10.0.0.0/24 via 10.0.2.1
 """))
 
 # Print the generated rspec.
