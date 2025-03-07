@@ -129,19 +129,36 @@ sudo sysctl -w net.ipv4.ip_forward=1
 
 # Set default gateways for the VMs.
 node_0.addService(pg.Execute(shell="bash", command="""
-sudo ip route add default via 10.0.0.1
+sudo ip route add 10.0.0.0/24 via 10.0.0.1
+sudo ip route add 10.0.1.0/24 via 10.0.0.1
+sudo ip route add 10.0.2.0/24 via 10.0.0.1
+sudo ip route add 10.0.3.0/24 via 10.0.0.1
 """))
+
 node_1.addService(pg.Execute(shell="bash", command="""
-sudo ip route add default via 10.0.0.1
+sudo ip route add 10.0.0.0/24 via 10.0.0.1
+sudo ip route add 10.0.1.0/24 via 10.0.0.1
+sudo ip route add 10.0.2.0/24 via 10.0.0.1
+sudo ip route add 10.0.3.0/24 via 10.0.0.1
 """))
+
 node_2.addService(pg.Execute(shell="bash", command="""
-sudo ip route add default via 10.0.2.1
+sudo ip route add 10.0.0.0/24 via 10.0.2.1
+sudo ip route add 10.0.1.0/24 via 10.0.2.1
+sudo ip route add 10.0.2.0/24 via 10.0.2.1
+sudo ip route add 10.0.3.0/24 via 10.0.2.1
 """))
 node_3.addService(pg.Execute(shell="bash", command="""
-sudo ip route add default via 10.0.1.1
+sudo ip route add 10.0.0.0/24 via 10.0.1.1
+sudo ip route add 10.0.1.0/24 via 10.0.1.1
+sudo ip route add 10.0.2.0/24 via 10.0.1.1
+sudo ip route add 10.0.3.0/24 via 10.0.1.1
 """))
 node_4.addService(pg.Execute(shell="bash", command="""
-sudo ip route add default via 10.0.1.1
+sudo ip route add 10.0.0.0/24 via 10.0.1.1
+sudo ip route add 10.0.1.0/24 via 10.0.1.1
+sudo ip route add 10.0.2.0/24 via 10.0.1.1
+sudo ip route add 10.0.3.0/24 via 10.0.1.1
 """))
 
 #
@@ -169,7 +186,8 @@ node_switch3.addService(pg.Execute(shell="bash", command="""
 # (Assuming the OS interface name for iface10 is 'interface-8'; adjust if needed.)
 # sudo ip route del 10.0.2.0/29 dev interface-8
 # Now, add a static route for node-2's network via switch2 (10.0.2.1):
-sudo ip route add 10.0.2.0/29 via 10.0.2.1
+# essential to add the onlink flag here. 
+sudo ip route add 10.0.2.0/29 via 10.0.2.1 onlink
 # Also, route traffic destined for switch1's network via switch1 (reachable via link-3 through switch2):
 sudo ip route add 10.0.0.0/24 via 10.0.2.1
 """))
