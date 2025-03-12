@@ -60,7 +60,7 @@ iface10 = node_switch4.addInterface('interface-8')
 # Node switch3: the switch connection switch 2 and node 2
 node_switch3 = request.RawPC('switch3')
 iface11 = node_switch3.addInterface('interface-11')
-iface12 = node_switch2.addInterface('interface-12')
+iface12 = node_switch3.addInterface('interface-12')
 
 
 # --- Define Links (L2 segments) ---
