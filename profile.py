@@ -23,23 +23,23 @@ request = pc.makeRequestRSpec()
 
 # --- Define Nodes and Their Interfaces ---
 # Node node-0
-node_0 = request.XenVM('node-0')
+node_0 = request.RawPC('node-0')
 iface0 = node_0.addInterface('interface-1')
 
 # Node node-1
-node_1 = request.XenVM('node-1')
+node_1 = request.RawPC('node-1')
 iface1 = node_1.addInterface('interface-2')
 
 # Node node-2 (will have only one interface)
-node_2 = request.XenVM('node-2')
+node_2 = request.RawPC('node-2')
 iface2 = node_2.addInterface('interface-6')
 
 # Node node-3
-node_3 = request.XenVM('node-3')
+node_3 = request.RawPC('node-3')
 iface3 = node_3.addInterface('interface-4')
 
 # Node node-4
-node_4 = request.XenVM('node-4')
+node_4 = request.RawPC('node-4')
 iface4 = node_4.addInterface('interface-5')
 
 # Node switch1
