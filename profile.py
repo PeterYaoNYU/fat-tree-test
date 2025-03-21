@@ -208,7 +208,7 @@ sudo ip route add 10.0.4.0/24 via 10.0.2.2
 # On switch3 (tor leaf)
 node_switch3.addService(pg.Execute(shell="bash", command="""
 sudo ip route add 10.0.0.0/24 via 10.0.2.1
-sudo ip route add 10.0.1.0/24 via 10.0.2.3
+sudo ip route add 10.0.1.0/24 via 10.0.2.1
 """))
 
 # On switch4 (a combination of different switch types)
